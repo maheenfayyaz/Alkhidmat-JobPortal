@@ -11,7 +11,9 @@
 
 
   import authRoutes from "./routes/web/Routes";
-  import AdminauthRoutes from "./routes/admin/Routes";
+import AdminauthRoutes from "./routes/admin/Routes";
+import jobRoutes from "./routes/web/jobRoutes"; // Import job routes
+import adminRoutes from "./routes/admin/adminRoutes";
 
 
 
@@ -36,6 +38,8 @@
   // ... after middleware setup
   app.use("/api/auth", authRoutes);
   app.use("/api/Adminauth", AdminauthRoutes);
+  app.use("/api/jobs", jobRoutes);
+  app.use("/api/admin", adminRoutes);
 
 
   // Rate limiting to prevent brute force attacks
