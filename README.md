@@ -1,2 +1,0 @@
-# Ak-Job-Portal
-
