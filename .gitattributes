@@ -1,0 +1,14 @@
+# Treat PDF files as binary to prevent line ending conversions
+*.pdf binary
+
+# Treat image files as binary
+*.jpeg binary
+*.jpg binary
+*.png binary
+*.gif binary
+*.svg binary
+
+# Treat other common binary files as binary
+*.zip binary
+*.tar binary
+*.gz binary

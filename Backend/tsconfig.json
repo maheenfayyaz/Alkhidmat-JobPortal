@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    /* File Layout */
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    /* Environment Settings */
+    "module": "commonjs",
+    "target": "ES2020",
+    "lib": ["esnext"],
+    "types": ["node"],
+
+    /* Output Options */
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    /* Strict Type Checking */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    /* Compatibility & Module Settings */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+
+    /* Module Detection */
+    "moduleDetection": "force",
+    "isolatedModules": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
