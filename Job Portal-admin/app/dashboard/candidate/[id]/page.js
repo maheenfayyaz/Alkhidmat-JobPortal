@@ -169,10 +169,18 @@ export default function CandidateDetails({ params }) {
         })
       }).catch(error => {
         console.error(error)
-        alert('Failed to save note')
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to save note'
+        })
       })
     } else {
-      alert('No applications found for this candidate')
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No applications found for this candidate'
+      })
     }
   }
 
