@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 const ApplicationContext = createContext()
 
@@ -13,6 +13,7 @@ export function ApplicationProvider({ children }) {
   const [error, setError] = useState(null)
   const [adminToken, setAdminToken] = useState(null)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     // Load token from localStorage on mount
@@ -21,12 +22,15 @@ export function ApplicationProvider({ children }) {
     if (token) {
       setAdminToken(token)
     } else {
-      // Delay redirect to allow token to be set if in signup flow
-      setTimeout(() => {
-        router.push('/login')
-      }, 500)
+      const isAuthPage = pathname === '/signup' || pathname === '/login'
+      if (!isAuthPage) {
+        // Delay redirect to allow token to be set if in signup flow
+        setTimeout(() => {
+          router.push('/login')
+        }, 500)
+      }
     }
-  }, [router])
+  }, [router, pathname])
 
   // Helper to handle logout
   const logout = () => {

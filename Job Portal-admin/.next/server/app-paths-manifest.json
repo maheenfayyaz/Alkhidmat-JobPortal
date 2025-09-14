@@ -1,7 +1,7 @@
 {
-  "/dashboard/candidate/[id]/page": "app/dashboard/candidate/[id]/page.js",
-  "/dashboard/admin-jobs/page": "app/dashboard/admin-jobs/page.js",
-  "/dashboard/search/page": "app/dashboard/search/page.js",
-  "/dashboard/cvs/page": "app/dashboard/cvs/page.js",
-  "/dashboard/create-jobs/page": "app/dashboard/create-jobs/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/login/page": "app/login/page.js",
+  "/signup/page": "app/signup/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/candidate/[id]/page": "app/dashboard/candidate/[id]/page.js"
 }
