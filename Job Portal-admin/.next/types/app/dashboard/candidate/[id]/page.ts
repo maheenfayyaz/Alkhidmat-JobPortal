@@ -1,4 +1,4 @@
-// File: C:\Users\R.A LAPTOPS\Desktop\Alkhidmat\both files together\Job Portal-admin\app\dashboard\candidate\[id]\page.js
+// File: C:\Users\R.A LAPTOPS\Desktop\clone\SERVER-AK-JOBPORTAL\Job Portal-admin\app\dashboard\candidate\[id]\page.js
 import * as entry from '../../../../../../app/dashboard/candidate/[id]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

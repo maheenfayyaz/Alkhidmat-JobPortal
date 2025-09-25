@@ -15,7 +15,13 @@ export function Header() {
 
   console.log("Header user:", user);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const DEFAULT_PROFILE_IMAGE = "/default-profile.png";
+
   const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log("Profile image state updated:", profileImage);
+  }, [profileImage]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [searchInput, setSearchInput] = useState("");
@@ -23,31 +29,66 @@ export function Header() {
   const isActive = (path: string) => pathname === path;
 
   // Load profile image from localStorage
-  useEffect(() => {
-    const loadProfileImage = () => {
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem("profileData");
-        if (stored) {
-          try {
-            const profileData = JSON.parse(stored);
-            setProfileImage(profileData.image);
-          } catch (error) {
-            console.error("Error loading profile image:", error);
+  const loadProfileImage = () => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("profileData");
+      console.log("LocalStorage profileData:", stored);
+      if (stored) {
+        try {
+          const profileData = JSON.parse(stored);
+          console.log("Parsed profileData:", profileData);
+          console.log("profileData keys:", Object.keys(profileData));
+          const imageUrl = profileData.profileImage || profileData.image || null;
+          if (imageUrl) {
+            try {
+              // Remove backend origin from imageUrl to use relative path for proxy
+              const backendOrigin = "http://localhost:8000";
+              let relativeUrl = imageUrl;
+              if (imageUrl.startsWith(backendOrigin)) {
+                relativeUrl = imageUrl.substring(backendOrigin.length);
+                if (!relativeUrl.startsWith("/")) {
+                  relativeUrl = "/" + relativeUrl;
+                }
+              }
+              const url = new URL(relativeUrl, window.location.origin);
+              const encodedPath = url.pathname.split('/').map(encodeURIComponent).join('/');
+              const encodedUrl = url.origin + encodedPath + url.search;
+              setProfileImage(encodedUrl);
+            } catch (e) {
+              setProfileImage(encodeURI(imageUrl));
+            }
+          } else {
+            setProfileImage(null);
           }
+        } catch (error) {
+          console.error("Error loading profile image:", error);
+          setProfileImage(null);
         }
+      } else {
+        setProfileImage(null);
       }
-    };
+    }
+  };
 
+  useEffect(() => {
     loadProfileImage();
 
     // Listen for localStorage changes
-    const handleStorageChange = () => {
-      loadProfileImage();
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === "profileImageUpdateTimestamp" || event.key === "profileData") {
+        console.log("Storage event detected, reloading profile image");
+        loadProfileImage();
+      }
     };
 
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
+
+  // Handle image loading error to fallback to default image
+  const handleImageError = () => {
+    setProfileImage(DEFAULT_PROFILE_IMAGE);
+  };
 
   // Handle navigation clicks with immediate response
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -201,9 +242,10 @@ export function Header() {
                 <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
                   {profileImage ? (
                     <img
-                      src={profileImage}
+                      src={profileImage + "?t=" + new Date().getTime()}
                       alt="Profile"
                       className="w-full h-full object-cover"
+                      onError={handleImageError}
                     />
                   ) : (
                     <User className="w-5 h-5 text-gray-600" />

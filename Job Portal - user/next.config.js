@@ -15,9 +15,13 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  // Custom port configuration
   async rewrites() {
-    return [];
+    return [
+      {
+        source: '/uploads/:path*',
+        destination: 'http://localhost:8000/uploads/:path*' 
+      }
+    ];
   },
 };
 

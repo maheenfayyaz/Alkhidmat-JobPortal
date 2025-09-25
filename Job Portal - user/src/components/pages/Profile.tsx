@@ -1,12 +1,17 @@
 "use client";
 
+import Swal from "sweetalert2";
+
 import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Camera, Save, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function Profile() {
+  const { updateUser } = useAuth();
+
   const [isEditing, setIsEditing] = useState(false);
 
   const [savedData, setSavedData] = useState<{
@@ -60,24 +65,40 @@ export default function Profile() {
 
   // Fetch profile data from backend API on mount
   useEffect(() => {
-    async function fetchProfile() {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:8000/api/auth/profile", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          credentials: "include",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch profile data");
-        }
-        const data = await response.json();
-        console.log("Fetched profile phone:", data.profile.phone); // Debug log for phone
-        setSavedData({
-        image: data.profile.profileImage ? `http://localhost:8000${data.profile.profileImage.startsWith('/') ? data.profile.profileImage : '/' + data.profile.profileImage}` : savedData.image,
+    fetchProfileData();
+  }, []);
+
+  // Listen for profile image update timestamp changes to reload profile image immediately
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === "profileImageUpdateTimestamp") {
+        // Refetch profile data to update image and other info
+        fetchProfileData();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Extract fetchProfileData function for reuse
+  async function fetchProfileData() {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:8000/api/auth/profile", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch profile data");
+      }
+      const data = await response.json();
+      setSavedData({
+        image: data.profile.profileImage ? (data.profile.profileImage.startsWith('data:') ? data.profile.profileImage : `http://localhost:8000${data.profile.profileImage.startsWith('/') ? data.profile.profileImage : '/' + data.profile.profileImage}`) : savedData.image,
         name: data.profile.fullname || savedData.name || "",
         title: data.profile.title || savedData.title || "",
         about: data.profile.about || savedData.about || "",
@@ -109,47 +130,45 @@ export default function Profile() {
               bgColor: edu.bgColor ?? "",
             }))
           : [],
-        });
-        setEditData({
-          image: data.profile.profileImage ? `http://localhost:8000${data.profile.profileImage.startsWith('/') ? data.profile.profileImage : '/' + data.profile.profileImage}` : savedData.image,
-          name: data.profile.fullname || savedData.name || "",
-          title: data.profile.title || savedData.title || "",
-          about: data.profile.about || savedData.about || "",
-          age: data.profile.age || savedData.age || "",
-          nationalId: data.profile.nationalId || savedData.nationalId || "",
-          city: data.profile.city || savedData.city || "",
-          email: data.profile.email || savedData.email || "",
-          dateOfBirth: data.profile.dateOfBirth || savedData.dateOfBirth || "",
-          country: data.profile.country || savedData.country || "",
-          phone: data.profile.phone ?? savedData.phone ?? "",
-          address: data.profile.address || savedData.address || "",
-          experience: Array.isArray(data.profile.experience)
-            ? data.profile.experience.map((exp: any, index: number) => ({
-                id: exp.id ?? index,
-                company: exp.company ?? "",
-                position: exp.position ?? "",
-                duration: exp.duration ?? "",
-                logo: exp.logo ?? "",
-                bgColor: exp.bgColor ?? "",
-              }))
-            : [],
-          education: Array.isArray(data.profile.education)
-            ? data.profile.education.map((edu: any, index: number) => ({
-                id: edu.id ?? index,
-                institution: edu.institution ?? "",
-                degree: edu.degree ?? "",
-                duration: edu.duration ?? "",
-                logo: edu.logo ?? "",
-                bgColor: edu.bgColor ?? "",
-              }))
-            : [],
-        });
-      } catch (error) {
-        console.error("Error fetching profile data:", error);
-      }
+      });
+      setEditData({
+        image: data.profile.profileImage ? (data.profile.profileImage.startsWith('data:') ? data.profile.profileImage : `http://localhost:8000${data.profile.profileImage.startsWith('/') ? data.profile.profileImage : '/' + data.profile.profileImage}`) : savedData.image,
+        name: data.profile.fullname || savedData.name || "",
+        title: data.profile.title || savedData.title || "",
+        about: data.profile.about || savedData.about || "",
+        age: data.profile.age || savedData.age || "",
+        nationalId: data.profile.nationalId || savedData.nationalId || "",
+        city: data.profile.city || savedData.city || "",
+        email: data.profile.email || savedData.email || "",
+        dateOfBirth: data.profile.dateOfBirth || savedData.dateOfBirth || "",
+        country: data.profile.country || savedData.country || "",
+        phone: data.profile.phone ?? savedData.phone ?? "",
+        address: data.profile.address || savedData.address || "",
+        experience: Array.isArray(data.profile.experience)
+          ? data.profile.experience.map((exp: any, index: number) => ({
+              id: exp.id ?? index,
+              company: exp.company ?? "",
+              position: exp.position ?? "",
+              duration: exp.duration ?? "",
+              logo: exp.logo ?? "",
+              bgColor: exp.bgColor ?? "",
+            }))
+          : [],
+        education: Array.isArray(data.profile.education)
+          ? data.profile.education.map((edu: any, index: number) => ({
+              id: edu.id ?? index,
+              institution: edu.institution ?? "",
+              degree: edu.degree ?? "",
+              duration: edu.duration ?? "",
+              logo: edu.logo ?? "",
+              bgColor: edu.bgColor ?? "",
+            }))
+          : [],
+      });
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
     }
-    fetchProfile();
-  }, []);
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -254,9 +273,20 @@ export default function Profile() {
         throw new Error("Failed to update profile");
       }
       const updatedData = await response.json();
-      setSavedData(updatedData.profile);
-      setEditData(updatedData.profile);
+      const profileWithName = {
+        ...updatedData.profile,
+        name: updatedData.profile.fullname || "",
+        profileImage: updatedData.profile.profileImage ? (updatedData.profile.profileImage.startsWith('data:') ? updatedData.profile.profileImage : `http://localhost:8000${updatedData.profile.profileImage.startsWith('/') ? updatedData.profile.profileImage : '/' + updatedData.profile.profileImage}`) : savedData.image,
+        isAuthenticated: true,
+      };
+      setSavedData(profileWithName);
+      setEditData(profileWithName);
       setIsEditing(false);
+      updateUser(profileWithName);
+      // Save updated profile data to localStorage for Header component
+      localStorage.setItem("profileData", JSON.stringify(profileWithName));
+      // Force reload of header image by updating a timestamp in localStorage
+      localStorage.setItem("profileImageUpdateTimestamp", Date.now().toString());
       Swal.fire({
         icon: 'success',
         title: 'Profile Updated',
@@ -290,17 +320,18 @@ export default function Profile() {
         {/* Profile Header */}
         <div className="text-center mb-12">
             <div className="relative w-32 h-32 mx-auto mb-6">
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-orange-200 to-orange-300">
-                <img
-                  src={isEditing ? editData.image : savedData.image}
-                  alt={
-                    isEditing
-                      ? editData.name ?? ""
-                      : savedData.name ?? ""
-                  }
-                  className="w-full h-full object-cover"
-                />
-              </div>
+      <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-orange-200 to-orange-300">
+        <img
+          crossOrigin="use-credentials"
+          src={(isEditing ? editData.image : savedData.image) + "?t=" + new Date().getTime()}
+          alt={
+            isEditing
+              ? editData.name ?? ""
+              : savedData.name ?? ""
+          }
+          className="w-full h-full object-cover"
+        />
+      </div>
               {isEditing && (
                 <div className="absolute bottom-0 right-0">
                   <label htmlFor="profile-image" className="cursor-pointer">
@@ -734,7 +765,6 @@ export default function Profile() {
                       <h3 className="font-semibold text-gray-900">
                         {edu.institution}
                       </h3>
-                      <p className="font-semibold">Duration</p>
                       <p className="text-gray-600">{edu.duration}</p>
                       <p className="font-semibold">Degree</p>
                       <p className="text-gray-700">{edu.degree}</p>

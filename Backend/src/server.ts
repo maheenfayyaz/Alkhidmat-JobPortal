@@ -31,7 +31,21 @@ app.use(cors({
   origin: ["http://localhost:3000", "http://localhost:8080"],
   credentials: true
 }));
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'self'", "http://localhost:3000"],
+      upgradeInsecureRequests: [],
+    },
+  },
+}));
 app.use(compression());
 app.use(morgan("dev"));
 app.use(express.json({ limit: "10mb" }));
@@ -39,18 +53,48 @@ app.use(cookieParser());
 
 // Serve static files for profile images with CORS headers
 import path from "path";
-app.use('/uploads/profile_images', express.static(path.join(__dirname, '../uploads/profile_images'), {
-  setHeaders: (res, path) => {
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Credentials', 'true');
+import fs from "fs";
+
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:8080'];
+
+// Route to handle profile image requests with proper CORS
+app.get('/uploads/profile_images/:filename', (req, res) => {
+  const filePath = path.join(__dirname, '../uploads/profile_images', req.params.filename);
+
+  // Dynamically set CORS headers based on request origin
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.set('Access-Control-Allow-Origin', origin);
   }
-}));
+  // Remove Access-Control-Allow-Credentials header for image requests to avoid CORS issues
+  // res.set('Access-Control-Allow-Credentials', 'true');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.set('Access-Control-Max-Age', '86400'); // 24 hours
+
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    // Return a default image if the requested image doesn't exist
+    const defaultImagePath = path.join(__dirname, '../uploads/profile_images/default-profile.png');
+    if (fs.existsSync(defaultImagePath)) {
+      res.sendFile(defaultImagePath);
+    } else {
+      res.status(404).json({ error: 'Image not found' });
+    }
+  }
+});
 
 // Serve static files for general uploads folder with CORS headers
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
   setHeaders: (res, path) => {
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Credentials', 'true');
+    // Dynamically set CORS headers based on request origin
+    const origin = res.req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+      res.set('Access-Control-Allow-Origin', origin);
+    }
+    // Remove Access-Control-Allow-Credentials header to avoid CORS issues
+    // res.set('Access-Control-Allow-Credentials', 'true');
   }
 }));
 

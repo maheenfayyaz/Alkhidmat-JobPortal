@@ -1,4 +1,4 @@
-// File: C:\Users\R.A LAPTOPS\Desktop\Alkhidmat\both files together\Job Portal - user\src\app\my-applications\page.tsx
+// File: C:\Users\R.A LAPTOPS\Desktop\clone\SERVER-AK-JOBPORTAL\Job Portal - user\src\app\my-applications\page.tsx
 import * as entry from '../../../../src/app/my-applications/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

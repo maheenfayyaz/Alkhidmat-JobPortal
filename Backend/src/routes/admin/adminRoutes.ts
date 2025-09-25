@@ -34,9 +34,9 @@ import {
 } from "../../controllers/admin/exportController";
 
 // Resume
-import { 
-  downloadResume, 
-  viewResume,
+import {
+  proxyViewResume,
+  proxyDownloadResume,
   downloadAllResumes
 } from "../../controllers/admin/resumeController";
 
@@ -74,11 +74,9 @@ router.get("/export/applications", exportApplications);
 router.get("/export/jobs", exportJobs);
 
 // Resume routes
-router.get("/resumes/:id/download", downloadResume);
-router.get("/resumes/:id/view", viewResume);
-/* Temporarily commented out to isolate error
+router.get("/resumes/:id/view", proxyViewResume);
+router.get("/resumes/:id/download", proxyDownloadResume);
 router.get("/resumes/downloadAll", downloadAllResumes);
-*/
 
 // Debug route to list resume links
 // router.get("/debug/resumes", listResumeLinks);

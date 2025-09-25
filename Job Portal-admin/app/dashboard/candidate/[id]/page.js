@@ -6,6 +6,7 @@ import { ArrowLeft, Download, Save } from 'lucide-react'
 import { useApplicationContext } from "../../../context/ApplicationContext"
 import { useRouter } from 'next/navigation'
 import Swal from 'sweetalert2'
+import CVPreview from '../CVPreview'
 
 export default function CandidateDetails({ params }) {
   const router = useRouter()
@@ -40,7 +41,6 @@ export default function CandidateDetails({ params }) {
     }
     loadCandidate()
   }, [fetchCandidateDetails, getCandidateDetails, params.id])
-
 
   useEffect(() => {
     if (applications.length > 0) {
@@ -100,7 +100,7 @@ export default function CandidateDetails({ params }) {
   const handleStatusChange = (newStatus) => {
     setApplicationStatus(newStatus)
     // Map frontend status to backend allowed status values
-  const statusMap = {
+    const statusMap = {
       'Under Review': 'reviewed',
       'Interview Scheduled': 'shortlisted',
       'Rejected': 'rejected',
@@ -321,22 +321,25 @@ export default function CandidateDetails({ params }) {
           {/* CV Preview */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">CV Preview</h3>
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="flex-1 bg-gray-100 rounded-lg p-8 text-center">
-                <div className="space-y-4">
-                  <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6">
-                    <div className="text-sm text-gray-500 mb-2">CV Preview</div>
-                    <div className="font-semibold">{candidate?.fullname || '-'}</div>
-                    <div className="text-sm text-gray-600">{applications.length > 0 ? (applications[0].position || applications[0].job?.title) : '-'}</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-gray-200 h-16 rounded"></div>
-                    <div className="bg-gray-200 h-16 rounded"></div>
-                    <div className="bg-gray-200 h-16 rounded"></div>
-                  </div>
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="flex-1 bg-gray-100 rounded-lg p-8 text-center">
+              <div className="space-y-4">
+                <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6">
+                  <div className="text-sm text-gray-500 mb-2">CV Preview</div>
+                  <div className="font-semibold">{candidate?.fullname || '-'}</div>
+                  <div className="text-sm text-gray-600">{applications.length > 0 ? (applications[0].position || applications[0].job?.title) : '-'}</div>
+          {applications.length > 0 && (
+            <CVPreview applicationId={applications[0]._id} />
+          )}
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-gray-200 h-16 rounded"></div>
+                  <div className="bg-gray-200 h-16 rounded"></div>
+                  <div className="bg-gray-200 h-16 rounded"></div>
                 </div>
               </div>
             </div>
+          </div>
           </div>
 
           {/* Application Management */}
