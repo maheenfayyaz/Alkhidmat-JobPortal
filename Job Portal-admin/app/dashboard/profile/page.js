@@ -60,6 +60,16 @@ export default function ProfileSettings() {
     }))
   }
 
+  const validatePassword = (password) => {
+    const errors = []
+    if (password.length < 8) errors.push('At least 8 characters long')
+    if (!/[A-Z]/.test(password)) errors.push('Include at least one uppercase letter')
+    if (!/[a-z]/.test(password)) errors.push('Include at least one lowercase letter')
+    if (!/[0-9]/.test(password)) errors.push('Include at least one number')
+    if (!/[^A-Za-z0-9]/.test(password)) errors.push('Include at least one special character')
+    return errors
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsUpdating(true)
@@ -69,6 +79,17 @@ export default function ProfileSettings() {
         icon: 'error',
         title: 'Error',
         text: 'New password and confirmation do not match'
+      })
+      setIsUpdating(false)
+      return
+    }
+
+    const passwordErrors = validatePassword(formData.newPassword)
+    if (passwordErrors.length > 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Password',
+        text: `Password must: ${passwordErrors.join(', ')}`
       })
       setIsUpdating(false)
       return

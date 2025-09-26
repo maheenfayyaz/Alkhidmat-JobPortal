@@ -97,73 +97,69 @@ export default function Profile() {
         throw new Error("Failed to fetch profile data");
       }
       const data = await response.json();
+      console.log("Raw API response in fetchProfileData:", data); // Debug: Log full response structure
+      const profile = data?.profile || data || {}; // Fallback to direct data if no 'profile' wrapper
+      // Safe image handling: ensure profileImage is string, fallback to default
+      let profileImage = savedData.image; // Default to current saved image
+      if (profile.profileImage) {
+        const img = profile.profileImage;
+        if (typeof img === 'string') {
+          profileImage = img.startsWith('data:') ? img : `http://localhost:8000${img.startsWith('/') ? img : '/' + img}`;
+        }
+      }
+      const experience = Array.isArray(profile.experience)
+        ? profile.experience.map((exp: any, index: number) => ({
+            id: exp.id ?? index,
+            company: exp.company ?? "",
+            position: exp.position ?? "",
+            duration: exp.duration ?? "",
+            logo: exp.logo ?? "",
+            bgColor: exp.bgColor ?? "",
+          }))
+        : [];
+      const education = Array.isArray(profile.education)
+        ? profile.education.map((edu: any, index: number) => ({
+            id: edu.id ?? index,
+            institution: edu.institution ?? "",
+            degree: edu.degree ?? "",
+            duration: edu.duration ?? "",
+            logo: edu.logo ?? "",
+            bgColor: edu.bgColor ?? "",
+          }))
+        : [];
+      // Ensure image is always a string fallback
+      profileImage = profileImage || "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face";
       setSavedData({
-        image: data.profile.profileImage ? (data.profile.profileImage.startsWith('data:') ? data.profile.profileImage : `http://localhost:8000${data.profile.profileImage.startsWith('/') ? data.profile.profileImage : '/' + data.profile.profileImage}`) : savedData.image,
-        name: data.profile.fullname || savedData.name || "",
-        title: data.profile.title || savedData.title || "",
-        about: data.profile.about || savedData.about || "",
-        age: data.profile.age || savedData.age || "",
-        nationalId: data.profile.nationalId || savedData.nationalId || "",
-        city: data.profile.city || savedData.city || "",
-        email: data.profile.email || savedData.email || "",
-        dateOfBirth: data.profile.dateOfBirth || savedData.dateOfBirth || "",
-        country: data.profile.country || savedData.country || "",
-        phone: data.profile.phone ?? savedData.phone ?? "",
-        address: data.profile.address || savedData.address || "",
-        experience: Array.isArray(data.profile.experience)
-          ? data.profile.experience.map((exp: any, index: number) => ({
-              id: exp.id ?? index,
-              company: exp.company ?? "",
-              position: exp.position ?? "",
-              duration: exp.duration ?? "",
-              logo: exp.logo ?? "",
-              bgColor: exp.bgColor ?? "",
-            }))
-          : [],
-        education: Array.isArray(data.profile.education)
-          ? data.profile.education.map((edu: any, index: number) => ({
-              id: edu.id ?? index,
-              institution: edu.institution ?? "",
-              degree: edu.degree ?? "",
-              duration: edu.duration ?? "",
-              logo: edu.logo ?? "",
-              bgColor: edu.bgColor ?? "",
-            }))
-          : [],
+        image: profileImage,
+        name: profile.fullname ?? profile.name ?? (savedData?.name || ""),
+        title: profile.title ?? (savedData?.title || ""),
+        about: profile.about ?? (savedData?.about || ""),
+        age: profile.age ?? (savedData?.age || ""),
+        nationalId: profile.nationalId ?? (savedData?.nationalId || ""),
+        city: profile.city ?? (savedData?.city || ""),
+        email: profile.email ?? (savedData?.email || ""),
+        dateOfBirth: profile.dateOfBirth ?? (savedData?.dateOfBirth || ""),
+        country: profile.country ?? (savedData?.country || ""),
+        phone: profile.phone ?? savedData?.phone ?? "",
+        address: profile.address ?? (savedData?.address || ""),
+        experience,
+        education,
       });
       setEditData({
-        image: data.profile.profileImage ? (data.profile.profileImage.startsWith('data:') ? data.profile.profileImage : `http://localhost:8000${data.profile.profileImage.startsWith('/') ? data.profile.profileImage : '/' + data.profile.profileImage}`) : savedData.image,
-        name: data.profile.fullname || savedData.name || "",
-        title: data.profile.title || savedData.title || "",
-        about: data.profile.about || savedData.about || "",
-        age: data.profile.age || savedData.age || "",
-        nationalId: data.profile.nationalId || savedData.nationalId || "",
-        city: data.profile.city || savedData.city || "",
-        email: data.profile.email || savedData.email || "",
-        dateOfBirth: data.profile.dateOfBirth || savedData.dateOfBirth || "",
-        country: data.profile.country || savedData.country || "",
-        phone: data.profile.phone ?? savedData.phone ?? "",
-        address: data.profile.address || savedData.address || "",
-        experience: Array.isArray(data.profile.experience)
-          ? data.profile.experience.map((exp: any, index: number) => ({
-              id: exp.id ?? index,
-              company: exp.company ?? "",
-              position: exp.position ?? "",
-              duration: exp.duration ?? "",
-              logo: exp.logo ?? "",
-              bgColor: exp.bgColor ?? "",
-            }))
-          : [],
-        education: Array.isArray(data.profile.education)
-          ? data.profile.education.map((edu: any, index: number) => ({
-              id: edu.id ?? index,
-              institution: edu.institution ?? "",
-              degree: edu.degree ?? "",
-              duration: edu.duration ?? "",
-              logo: edu.logo ?? "",
-              bgColor: edu.bgColor ?? "",
-            }))
-          : [],
+        image: profileImage,
+        name: profile.fullname ?? profile.name ?? (savedData?.name || ""),
+        title: profile.title ?? (savedData?.title || ""),
+        about: profile.about ?? (savedData?.about || ""),
+        age: profile.age ?? (savedData?.age || ""),
+        nationalId: profile.nationalId ?? (savedData?.nationalId || ""),
+        city: profile.city ?? (savedData?.city || ""),
+        email: profile.email ?? (savedData?.email || ""),
+        dateOfBirth: profile.dateOfBirth ?? (savedData?.dateOfBirth || ""),
+        country: profile.country ?? (savedData?.country || ""),
+        phone: profile.phone ?? savedData?.phone ?? "",
+        address: profile.address ?? (savedData?.address || ""),
+        experience,
+        education,
       });
     } catch (error) {
       console.error("Error fetching profile data:", error);
@@ -183,7 +179,7 @@ export default function Profile() {
   const handleExperienceChange = (id: number, field: string, value: string) => {
     setEditData((prev) => ({
       ...prev,
-      experience: prev.experience.map((exp) =>
+      experience: (prev.experience || []).map((exp) =>
         exp.id === id ? { ...exp, [field]: value } : exp
       ),
     }));
@@ -192,7 +188,7 @@ export default function Profile() {
   const handleEducationChange = (id: number, field: string, value: string) => {
     setEditData((prev) => ({
       ...prev,
-      education: prev.education.map((edu) =>
+      education: (prev.education || []).map((edu) =>
         edu.id === id ? { ...edu, [field]: value } : edu
       ),
     }));
@@ -273,10 +269,42 @@ export default function Profile() {
         throw new Error("Failed to update profile");
       }
       const updatedData = await response.json();
+      const profile = updatedData?.profile || {};
+      // Safe image handling in handleSave: ensure profileImage is string
+      let profileImage = savedData.image; // Fallback to current
+      if (profile.profileImage) {
+        const img = profile.profileImage;
+        if (typeof img === 'string') {
+          profileImage = img.startsWith('data:') ? img : `http://localhost:8000${img.startsWith('/') ? img : '/' + img}`;
+        }
+      }
+      profileImage = profileImage || "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face";
+      const experience = Array.isArray(profile.experience)
+        ? profile.experience.map((exp: any, index: number) => ({
+            id: exp.id ?? index,
+            company: exp.company ?? "",
+            position: exp.position ?? "",
+            duration: exp.duration ?? "",
+            logo: exp.logo ?? "",
+            bgColor: exp.bgColor ?? "",
+          }))
+        : [];
+      const education = Array.isArray(profile.education)
+        ? profile.education.map((edu: any, index: number) => ({
+            id: edu.id ?? index,
+            institution: edu.institution ?? "",
+            degree: edu.degree ?? "",
+            duration: edu.duration ?? "",
+            logo: edu.logo ?? "",
+            bgColor: edu.bgColor ?? "",
+          }))
+        : [];
       const profileWithName = {
-        ...updatedData.profile,
-        name: updatedData.profile.fullname || "",
-        profileImage: updatedData.profile.profileImage ? (updatedData.profile.profileImage.startsWith('data:') ? updatedData.profile.profileImage : `http://localhost:8000${updatedData.profile.profileImage.startsWith('/') ? updatedData.profile.profileImage : '/' + updatedData.profile.profileImage}`) : savedData.image,
+        ...profile,
+        name: profile.fullname ?? profile.name ?? (savedData?.name || ""),
+        profileImage: profileImage,
+        experience,
+        education,
         isAuthenticated: true,
       };
       setSavedData(profileWithName);
@@ -293,6 +321,8 @@ export default function Profile() {
         text: 'Profile updated successfully!',
         confirmButtonColor: '#3B82F6'
       });
+      // Refetch profile data to ensure immediate UI update with new image from backend
+      fetchProfileData();
     } catch (error) {
       console.error("Error updating profile:", error);
       Swal.fire({
@@ -321,16 +351,23 @@ export default function Profile() {
         <div className="text-center mb-12">
             <div className="relative w-32 h-32 mx-auto mb-6">
       <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-orange-200 to-orange-300">
-        <img
-          crossOrigin="use-credentials"
-          src={(isEditing ? editData.image : savedData.image) + "?t=" + new Date().getTime()}
-          alt={
-            isEditing
-              ? editData.name ?? ""
-              : savedData.name ?? ""
-          }
-          className="w-full h-full object-cover"
-        />
+        {(() => {
+          const currentImage = (isEditing ? editData.image : savedData.image) || "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face";
+          const isBase64 = typeof currentImage === 'string' && currentImage.startsWith('data:');
+          const src = isBase64 ? currentImage : currentImage + "?t=" + new Date().getTime();
+          return (
+            <img
+              {...(isBase64 ? {} : { crossOrigin: "use-credentials" })}
+              src={src}
+              alt={
+                isEditing
+                  ? (editData.name ?? "")
+                  : (savedData.name ?? "")
+              }
+              className="w-full h-full object-cover"
+            />
+          );
+        })()}
       </div>
               {isEditing && (
                 <div className="absolute bottom-0 right-0">
@@ -610,11 +647,11 @@ export default function Profile() {
             )}
           </h2>
           <div className="space-y-4">
-          {(isEditing ? editData.experience : savedData.experience).map(
+          {(isEditing ? (editData.experience || []) : (savedData.experience || [])).map(
             (exp) => (
               <div key={exp.id} className="flex items-start space-x-4">
                 <div
-                  className={`w-12 h-12 ${exp.bgColor} rounded flex items-center justify-center flex-shrink-0`}
+                  className={`w-12 h-12 ${exp.bgColor || ''} rounded flex items-center justify-center flex-shrink-0`}
                 >
                   {/* Removed image for experience */}
                 </div>
@@ -623,7 +660,7 @@ export default function Profile() {
                     <>
                       <p className="font-semibold">Company</p>
                       <Input
-                        value={exp.company}
+                        value={exp.company || ''}
                         onChange={(e) =>
                           handleExperienceChange(
                             exp.id,
@@ -636,7 +673,7 @@ export default function Profile() {
                       />
                       <p className="font-semibold">Duration</p>
                       <Input
-                        value={exp.duration}
+                        value={exp.duration || ''}
                         onChange={(e) =>
                           handleExperienceChange(
                             exp.id,
@@ -649,7 +686,7 @@ export default function Profile() {
                       />
                       <p className="font-semibold">Position</p>
                       <Input
-                        value={exp.position}
+                        value={exp.position || ''}
                         onChange={(e) =>
                           handleExperienceChange(
                             exp.id,
@@ -665,12 +702,12 @@ export default function Profile() {
                     <>
                       <p className="font-semibold">Company</p>
                       <h3 className="font-semibold text-gray-900">
-                        {exp.company}
+                        {exp.company || ''}
                       </h3>
                       <p className="font-semibold">Duration</p>
-                      <p className="text-gray-600">{exp.duration}</p>
+                      <p className="text-gray-600">{exp.duration || ''}</p>
                       <p className="font-semibold">Position</p>
-                      <p className="text-gray-700">{exp.position}</p>
+                      <p className="text-gray-700">{exp.position || ''}</p>
                     </>
                   )}
                 </div>
@@ -708,11 +745,11 @@ export default function Profile() {
             )}
           </h2>
           <div className="space-y-4">
-          {(isEditing ? editData.education : savedData.education).map(
+          {(isEditing ? (editData.education || []) : (savedData.education || [])).map(
             (edu) => (
               <div key={edu.id} className="flex items-start space-x-4">
                 <div
-                  className={`w-12 h-12 ${edu.bgColor} rounded flex items-center justify-center flex-shrink-0`}
+                  className={`w-12 h-12 ${edu.bgColor || ''} rounded flex items-center justify-center flex-shrink-0`}
                 >
                   {/* Removed image for education */}
                 </div>
@@ -721,7 +758,7 @@ export default function Profile() {
                     <>
                       <p className="font-semibold">Institution</p>
                       <Input
-                        value={edu.institution}
+                        value={edu.institution || ''}
                         onChange={(e) =>
                           handleEducationChange(
                             edu.id,
@@ -734,7 +771,7 @@ export default function Profile() {
                       />
                       <p className="font-semibold">Duration</p>
                       <Input
-                        value={edu.duration}
+                        value={edu.duration || ''}
                         onChange={(e) =>
                           handleEducationChange(
                             edu.id,
@@ -747,7 +784,7 @@ export default function Profile() {
                       />
                       <p className="font-semibold">Degree</p>
                       <Input
-                        value={edu.degree}
+                        value={edu.degree || ''}
                         onChange={(e) =>
                           handleEducationChange(
                             edu.id,
@@ -763,11 +800,11 @@ export default function Profile() {
                     <>
                       <p className="font-semibold">Institution</p>
                       <h3 className="font-semibold text-gray-900">
-                        {edu.institution}
+                        {edu.institution || ''}
                       </h3>
-                      <p className="text-gray-600">{edu.duration}</p>
+                      <p className="text-gray-600">{edu.duration || ''}</p>
                       <p className="font-semibold">Degree</p>
-                      <p className="text-gray-700">{edu.degree}</p>
+                      <p className="text-gray-700">{edu.degree || ''}</p>
                     </>
                   )}
                 </div>

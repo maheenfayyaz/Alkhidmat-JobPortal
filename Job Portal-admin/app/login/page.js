@@ -100,6 +100,11 @@ export default function LoginPage() {
                 className="input-field"
                 required
               />
+              {error && (
+                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
             </div>
 
             <button

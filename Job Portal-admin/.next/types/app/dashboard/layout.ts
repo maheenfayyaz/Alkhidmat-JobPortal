@@ -1,4 +1,4 @@
-// File: C:\Users\R.A LAPTOPS\Desktop\clone\SERVER-AK-JOBPORTAL\Job Portal-admin\app\dashboard\layout.js
+// File: C:\Users\R.A LAPTOPS\Desktop\New folder (2)\Alkhidmat-JobPortal\Job Portal-admin\app\dashboard\layout.js
 import * as entry from '../../../../app/dashboard/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -23,6 +23,36 @@ export function Header() {
     console.log("Profile image state updated:", profileImage);
   }, [profileImage]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Update profile image when user from context changes (same-tab updates)
+  useEffect(() => {
+    if (user && user.profileImage) {
+      const imageUrl = user.profileImage;
+      if (imageUrl) {
+        try {
+          // Remove backend origin from imageUrl to use relative path for proxy
+          const backendOrigin = "http://localhost:8000";
+          let relativeUrl = imageUrl;
+          if (imageUrl.startsWith(backendOrigin)) {
+            relativeUrl = imageUrl.substring(backendOrigin.length);
+            if (!relativeUrl.startsWith("/")) {
+              relativeUrl = "/" + relativeUrl;
+            }
+          }
+          const url = new URL(relativeUrl, window.location.origin);
+          const encodedPath = url.pathname.split('/').map(encodeURIComponent).join('/');
+          const encodedUrl = url.origin + encodedPath + url.search;
+          setProfileImage(encodedUrl);
+        } catch (e) {
+          setProfileImage(encodeURI(imageUrl));
+        }
+      } else {
+        setProfileImage(null);
+      }
+    } else {
+      setProfileImage(null);
+    }
+  }, [user]);
 
   const [searchInput, setSearchInput] = useState("");
 
