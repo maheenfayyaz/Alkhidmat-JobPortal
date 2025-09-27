@@ -1,10 +1,10 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IUser extends Document {
-
   fullname: string;
   email: string;
-  password: string;
+  password?: string; // Optional for Google users
+  googleId?: string; // For Google OAuth
   // Profile fields
   title?: string;
   about?: string;
@@ -52,7 +52,7 @@ const userSchema = new Schema<IUser>(
     },
     password: {
       type: String,
-      required: true,
+      required: false,
       minlength: 8,
     },
     // Profile fields
@@ -114,6 +114,11 @@ const userSchema = new Schema<IUser>(
     }],
     profileImage: {
       type: String,
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows multiple null values
     },
   },
   { timestamps: true }

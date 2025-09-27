@@ -163,8 +163,7 @@ export default function Login() {
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  console.log("Google login clicked");
-                  // Handle Google login here
+                  window.location.href = 'http://localhost:8000/api/auth/google';
                 }}
                 className="w-full h-12 mb-6 border-gray-200 hover:bg-gray-50"
               >

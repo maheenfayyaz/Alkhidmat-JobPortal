@@ -7,21 +7,32 @@ import compression from "compression";
 import morgan from "morgan";
 import { connectDB } from "./config/db";
 import cookieParser from "cookie-parser";
+import passport from "passport";
+import session from "express-session";
 
-// ✅ Correct route imports
+dotenv.config();
+
+// Log all env vars for debugging (remove after fix)
+console.log('MONGO_URI defined:', !!process.env.MONGO_URI);
+console.log('PORT defined:', !!process.env.PORT);
+console.log('GOOGLE_CLIENT_ID defined:', !!process.env.GOOGLE_CLIENT_ID);
+console.log('GOOGLE_CLIENT_SECRET defined:', !!process.env.GOOGLE_CLIENT_SECRET);
+
+// Validate environment variables
+if (!process.env.MONGO_URI) throw new Error("❌ MONGO_URI is not defined in .env");
+if (!process.env.PORT) throw new Error("❌ PORT is not defined in .env");
+if (!process.env.SESSION_SECRET) throw new Error("❌ SESSION_SECRET is not defined in .env");
+
+// Import passport config to register strategies
+import './config/passport';
+
+// ✅ Correct route imports (moved after dotenv)
 import authRoutes from "./routes/web/Routes";          // signup/login/logout (user)
 import adminAuthRoutes from "./routes/admin/Routes";   // admin signup/login/logout
 import adminRoutes from "./routes/admin/adminRoutes"; // admin features: jobs, candidates, etc.
 import adminProfileRoutes from "./routes/admin/profileRoutes"; // admin profile routes
 import jobRoutes from "./routes/web/jobRoutes";       // user jobs
 import contactRoutes from "./routes/web/contactRoutes"; // contact form routes
-
-// Load env vars
-dotenv.config();
-
-// Validate environment variables
-if (!process.env.MONGO_URI) throw new Error("❌ MONGO_URI is not defined in .env");
-if (!process.env.PORT) throw new Error("❌ PORT is not defined in .env");
 
 const app: Application = express();
 
@@ -50,6 +61,17 @@ app.use(compression());
 app.use(morgan("dev"));
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
+app.use(session({
+  secret: process.env.SESSION_SECRET as string,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: false, // set to true for https
+    maxAge: 1000 * 60 * 60 * 24 // 1 day
+  }
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Serve static files for profile images with CORS headers
 import path from "path";

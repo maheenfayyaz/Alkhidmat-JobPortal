@@ -87,6 +87,17 @@ export default function SignUp() {
       return;
     }
 
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Special Character',
+        text: 'Password must contain at least one special character.',
+        confirmButtonColor: '#3B82F6'
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     if (!/^[A-Za-z\s]+$/.test(formData.fullName)) {
       Swal.fire({
         icon: 'warning',
@@ -261,8 +272,7 @@ export default function SignUp() {
               type="button"
               variant="outline"
               onClick={() => {
-                console.log("Google signup clicked");
-                // Handle Google signup here
+                window.location.href = 'http://localhost:8000/api/auth/google';
               }}
               className="w-full h-12 mb-6 border-gray-200 hover:bg-gray-50"
             >
